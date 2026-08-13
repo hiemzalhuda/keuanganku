@@ -1,0 +1,20 @@
+# Database
+db.json
+*.db
+*.bak
+*.bak-*
+
+# Node
+node_modules/
+npm-debug.log
+.yarn/
+.pnp.*
+
+# OS
+.DS_Store
+*.swp
+*.swo
+
+# Logs
+log/
+*.log
