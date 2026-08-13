@@ -6,8 +6,8 @@ Aplikasi web manajemen dana kas RT dengan port 3001.
 
 - **Dana 17an** – iuran rutin 100%
 - **Dana Baju Kaos** – iuran rutin 150%
-- Input transaksi via UI / database
-- Balance otomatis, tanpa target/progress
+
+Layanan: writevrous (input transaksi via UI / database), balance otomatis tanpa target/progress.
 
 ## Jalankan (Server Saat Ini)
 
@@ -17,20 +17,17 @@ npm install
 node server.js
 ```
 
-Akses di: `http://192.168.18.11:3001`
+Akses: `http://192.168.18.11:3001`
 
 ## Deploy ke Server Baru
 
-### Persyaratton Seting Server
+Skin chain:
 
-| Item | Spesifikasi |
-|------|-------------|
-| OS | Linux/ARM64 (terutama Armbian STB) |
-| Node.js | >= 18 |
-| RAM | minimal 1 GB |
-| Directory | `/root/my-ai-web` (atau lokasi yang diinginkan) |
+1. Clone repo
+2. Install dependencies
+3. Jalankan aplikasi
 
-### Instalasi
+Deploy instructions:
 
 ```bash
 # 1️⃣ Clone repo
@@ -44,19 +41,14 @@ npm install
 node server.js
 ```
 
-Data diperoleh dari `db.json`. Tanpa modifikasi file diatur ke /root/my-ai-web. Data di repo tidak tersimpan (db.json tidak ada di .gitignore).
-
-### Modifikasi Lokal Android (Opsional)
-
-Aplikasi Mahasiswa (Android) bisa diintegrasikan dengan `/api/login` untuk memasukkan transaksi. Perlu diarahkan:
-
-- Base URL: `http://192.168.18.11:3001`
-- Endpoint `/api/add` dan autentikasi (TIDAK dikirim lewat repo).
-
 ## Kredensial (server saat ini)
 
 | Akun | Password |
 |------|----------|
 | admin | admin123 |
 
-Selamat gunakan.
+## FAQ
+
+**Aplikasi offline?** Titik remote benar, database ter-set ke `db.json` di folder lokal tanpa di-push ke GitHub (ter-cover)
+**Jalankan data?** Gunakan file lokal `db.json` sebagai sumber data utama.
+**Solusi akses?** Base URL: `http://IP_SERVER:3001`
