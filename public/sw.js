@@ -1,5 +1,5 @@
 // Service Worker untuk KeuanganKu PWA
-const CACHE_NAME = 'keuanganku-v14';
+const CACHE_NAME = 'keuanganku-v15';
 const ASSETS = [
   '/',
   '/manifest.json',
