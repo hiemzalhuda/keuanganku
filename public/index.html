@@ -406,7 +406,11 @@ body {
   .mini-val { font-size: 1.1rem; }
   .stats { display: block; padding: 0; }
   .stats > * { margin: 0; }
-  .stats .mini-stats { margin-top: 14px; }
+  .stats .mini-stats { margin-top: 14px; margin-left: 0; margin-right: 0; }
+  .hero-balance.skeleton-hero { margin-left: 0; margin-right: 0; }
+
+  /* Nonaktifkan animasi reveal di desktop — biar tidak terlihat bertumpuk/overlap */
+  .tx-item, .tx-item.visible, .tx-item.reveal { opacity: 1; transform: none; transition-delay: 0ms !important; transition: box-shadow .2s, border-color .2s, transform .15s; }
 
   /* ---- FEATURE: 3 kartu tetap, lebih besar ---- */
   .feature-grid { gap: 14px; padding: 8px 0 0; }
