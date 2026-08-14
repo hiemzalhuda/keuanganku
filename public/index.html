@@ -158,7 +158,7 @@ body {
 .section-link { font-size: .76rem; color: var(--primary); font-weight: 700; background: none; border: none; cursor: pointer; padding: 4px; }
 
 /* Feature grid */
-.feature-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; padding: 6px 16px 0; }
+.feature-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(96px, 1fr)); gap: 8px; padding: 6px 16px 0; }
 .feature-card { background: var(--surface); border: 1px solid var(--border); border-radius: 18px; padding: 14px 6px; text-align: center; cursor: pointer; box-shadow: var(--shadow); transition: transform .15s; min-width: 0; }
 .feature-card:active { transform: scale(.94); }
 .feature-icon { width: 44px; height: 44px; margin: 0 auto 8px; border-radius: 14px; background: var(--primary-bg); display: flex; align-items: center; justify-content: center; font-size: 21px; }
@@ -414,7 +414,7 @@ body {
   .tx-item, .tx-item.visible, .tx-item.reveal { opacity: 1; transform: none; transition-delay: 0ms !important; transition: box-shadow .2s, border-color .2s, transform .15s; }
 
   /* ---- FEATURE: 3 kartu tetap, lebih besar ---- */
-  .feature-grid { gap: 14px; padding: 8px 0 0; }
+  .feature-grid { gap: 14px; padding: 8px 0 0; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); }
   .feature-card { padding: 20px 10px; border-radius: 20px; }
   .feature-card:hover { transform: translateY(-2px); box-shadow: var(--shadow-lg); }
 
@@ -539,10 +539,10 @@ body {
 
       <div class="section-head">
         <h3>Menu Cepat</h3>
-        <button class="section-link" onclick="showModal('fund')">+ Dana</button>
+        <button class="section-link auth-only" onclick="showModal('fund')" style="display:none">+ Dana</button>
       </div>
       <div class="feature-grid">
-        <div class="feature-card" onclick="showModal('tx')"><div class="feature-icon">📝</div><div class="feature-name">Catat Transaksi</div></div>
+        <div class="feature-card auth-only" onclick="showModal('tx')" style="display:none"><div class="feature-icon">📝</div><div class="feature-name">Catat Transaksi</div></div>
         <div class="feature-card" onclick="switchTab('funds')"><div class="feature-icon">🏦</div><div class="feature-name">Kelola Dana</div></div>
         <div class="feature-card" onclick="switchTab('summary')"><div class="feature-icon">📈</div><div class="feature-name">Laporan</div></div>
       </div>
@@ -573,7 +573,7 @@ body {
 
     <!-- TAB: DANA -->
     <div id="tab-funds" class="tab-content">
-      <div class="section-head"><h3>Dana Kas</h3><button class="section-link" onclick="showModal('fund')">+ Dana Baru</button></div>
+      <div class="section-head"><h3>Dana Kas</h3><button class="section-link auth-only" onclick="showModal('fund')" style="display:none">+ Dana Baru</button></div>
       <div class="card">
         <p style="font-size:.8rem;color:var(--text2)">Pisahkan uang ke dalam berbagai dana. Setiap transaksi bisa ditautkan ke dana tertentu.</p>
       </div>
@@ -649,7 +649,7 @@ body {
 <nav class="bottom-nav">
   <button class="active" data-tab="transactions"><span class="bn-icon">🏠</span>Beranda</button>
   <button data-tab="funds"><span class="bn-icon">🏦</span>Dana</button>
-  <button class="bn-fab" onclick="showModal('tx')" title="Tambah Transaksi">＋</button>
+  <button class="bn-fab auth-only" onclick="showModal('tx')" style="display:none" title="Tambah Transaksi">＋</button>
   <button data-tab="summary"><span class="bn-icon">📈</span>Laporan</button>
   <button data-tab="profile"><span class="bn-icon">👤</span>Profil</button>
 </nav>
@@ -1009,8 +1009,8 @@ async function loadStats() {
       <div class="hero-value">Rp ${fmt(bal)}</div>
       <div class="hero-sub">Bulan ini · masuk <span class="hero-in">+ Rp ${fmt(mi)}</span> · keluar <span class="hero-out">− Rp ${fmt(mo)}</span></div>
       <div class="hero-actions">
-        <button class="hero-btn" onclick="showModal('tx')"><span class="hero-btn-icon">＋</span>Transaksi</button>
-        <button class="hero-btn hero-btn-ghost" onclick="showModal('fund')"><span class="hero-btn-icon">＋</span>Dana</button>
+        <button class="hero-btn auth-only" style="display:none" onclick="showModal('tx')"><span class="hero-btn-icon">＋</span>Transaksi</button>
+        <button class="hero-btn hero-btn-ghost auth-only" style="display:none" onclick="showModal('fund')"><span class="hero-btn-icon">＋</span>Dana</button>
       </div>
     </div>
     <div class="mini-stats">
@@ -1021,6 +1021,7 @@ async function loadStats() {
   populateCatFilter();
   applyFilter();
   renderProfile();
+  updateAuthUI();
 }
 
 // ====== FILTER ======
@@ -1122,6 +1123,12 @@ function observeTxReveal() {
 
 // ====== MODAL ======
 function showModal(name) {
+  // Mode read-only: insert butuh login
+  if ((name === 'tx' || name === 'fund') && !isLoggedIn()) {
+    toast('Silakan login dulu untuk menambah data', 'error');
+    showLogin();
+    return;
+  }
   if (name === 'tx') {
     document.getElementById('txEditId').value = '';
     document.getElementById('txType').value = 'out';
