@@ -425,10 +425,18 @@ body {
   .filter-bar { padding: 8px 0 14px; }
   .filter-bar input, .filter-bar select { padding: 11px 14px; font-size: .84rem; }
 
-  /* ---- TX LIST: 2 kolom ---- */
-  .tx-list { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-  .tx-item { border-radius: 16px; padding: 15px 16px; }
-  .tx-item:hover { border-color: var(--border2); box-shadow: var(--shadow-lg); }
+  /* ---- TX LIST: tabel desktop (bukan kartu) ---- */
+  .tx-list { display: block; }
+  .tx-table-scroll { overflow-y: auto; max-height: 620px; border-radius: 14px; border: 1px solid var(--border); }
+  .tx-table-desktop { width: 100%; border-collapse: collapse; font-size: .85rem; background: var(--surface); }
+  .tx-table-desktop thead th { position: sticky; top: 0; background: var(--surface2); color: var(--text3); font-size: .72rem; font-weight: 700; text-transform: uppercase; letter-spacing: .04em; text-align: left; padding: 12px 14px; border-bottom: 1px solid var(--border); }
+  .tx-table-desktop tbody td { padding: 11px 14px; border-bottom: 1px solid var(--border); color: var(--text2); vertical-align: middle; }
+  .tx-table-desktop tbody tr:last-child td { border-bottom: none; }
+  .tx-table-desktop tbody tr:hover { background: var(--surface2); }
+  .tx-table-desktop .tx-table-amt { text-align: right; font-weight: 700; white-space: nowrap; }
+  .tx-table-amt.in { color: var(--success); }
+  .tx-table-amt.out { color: var(--danger); }
+  .tx-table-desktop .tx-table-actions { text-align: right; white-space: nowrap; }
 
   /* ---- CARD kontainer transaksi ---- */
   .card { border-radius: 22px; padding: 22px; }
@@ -1048,7 +1056,10 @@ function resetFilter() {
 }
 
 // ====== RENDER TRANSACTIONS ======
+const isDesktop = () => window.innerWidth >= 860;
+
 function renderTxList(list) {
+  if (isDesktop()) return renderTxTable(list);
   const listEl = document.getElementById('txList');
   const empty = document.getElementById('txEmpty');
   const summary = document.getElementById('txSummary');
@@ -1090,6 +1101,47 @@ function renderTxList(list) {
   }).join('');
 
   observeTxReveal();
+}
+
+// ====== RENDER TRANSACTIONS (DESKTOP: tabel ringkas) ======
+function renderTxTable(list) {
+  const listEl = document.getElementById('txList');
+  const empty = document.getElementById('txEmpty');
+  const summary = document.getElementById('txSummary');
+  const totalIn = list.filter(t=>t.type==='in').reduce((s,t)=>s+t.amount,0);
+  const totalOut = list.filter(t=>t.type==='out').reduce((s,t)=>s+t.amount,0);
+  summary.innerHTML = `<span>📥 Masuk: <strong style="color:var(--success)">Rp ${fmt(totalIn)}</strong></span><span>📤 Keluar: <strong style="color:var(--danger)">Rp ${fmt(totalOut)}</strong></span><span>💳 Saldo: <strong style="color:var(--primary)">Rp ${fmt(totalIn-totalOut)}</strong></span><span style="color:var(--text3)">${list.length} transaksi</span>`;
+
+  if (!list.length) { listEl.innerHTML = ''; empty.style.display = 'block'; return; }
+  empty.style.display = 'none';
+
+  const rows = [...list].sort((a,b)=>new Date(b.date)-new Date(a.date)).map(t => {
+    const isOut = t.type === 'out';
+    const sign = isOut ? '−' : '+';
+    const cls = isOut ? 'out' : 'in';
+    const fundTxt = t.fund ? `<span class="tx-fund">${t.fund}</span>` : '<span style="color:var(--text3)">—</span>';
+    const actions = isLoggedIn() ? `
+      <td class="tx-table-actions">
+        <button class="btn btn-ghost btn-sm btn-icon" onclick="editTx('${t.id}')" title="Edit">✏️</button>
+        <button class="btn btn-ghost btn-sm btn-icon" onclick="askDelete('tx','${t.id}')" title="Hapus">🗑️</button>
+      </td>` : '';
+    return `<tr>
+      <td class="tx-date" style="white-space:nowrap">${dateID(t.date)}</td>
+      <td><span class="tx-note">${t.category}</span></td>
+      <td>${t.note}</td>
+      <td>${fundTxt}</td>
+      <td class="tx-table-amt ${cls}">${sign} Rp ${fmt(t.amount)}</td>
+      ${actions}
+    </tr>`;
+  }).join('');
+
+  const colActions = isLoggedIn() ? '<th class="tx-table-actions">Aksi</th>' : '';
+  listEl.innerHTML = `<div class="tx-table-scroll"><table class="tx-table-desktop">
+    <thead><tr>
+      <th>Tanggal</th><th>Kategori</th><th>Catatan</th><th>Dana</th><th class="tx-table-amt">Jumlah</th>${colActions}
+    </tr></thead>
+    <tbody>${rows}</tbody>
+  </table></div>`;
 }
 
 // ====== SCROLL REVEAL (staggered) ======
@@ -1508,6 +1560,11 @@ loadStats();
 loadFunds();
 updateAuthUI();
 checkAuthStatus();
+
+// Re-render daftar transaksi saat ukuran layar berubah (mobile ↔ desktop)
+window.addEventListener('resize', () => {
+  if (allTx.length) applyFilter();
+});
 
 // ====== PWA: REGISTER SERVICE WORKER ======
 if ('serviceWorker' in navigator) {
